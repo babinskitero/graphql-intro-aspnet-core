@@ -23,7 +23,7 @@ namespace graphql_intro_web_core
             services.AddDbContext<BookDbContext>(options => options.UseInMemoryDatabase(databaseName: "Books"));
             
             services.AddGraphQL(SchemaBuilder.New()
-                .AddQueryType<Query>()
+                .AddQueryType<QueryType>()
                 .AddMutationType<Mutation>()
                 .Create());
         }
