@@ -1,13 +1,17 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using HotChocolate;
+using HotChocolate.Resolvers;
 using HotChocolate.Types;
+using HotChocolate.Types.Descriptors;
 
 
 public static class Test
 {
     public static IObjectFieldDescriptor UseLimitOffsetPaging<TSchemaType>(
         this IObjectFieldDescriptor descriptor)
-        where TSchemaType : class, IOutputType
+        where TSchemaType : class
     {
         descriptor
             .Type<PaginationPayloadType<TSchemaType>>()
@@ -17,12 +21,12 @@ public static class Test
             {
                 await next(context);
 
-                if(context.Result is IQueryable<TSchemaType> list)
+                if (context.Result is IQueryable<TSchemaType> list)
                 {
                     
-                    var paginatedList = await PaginatedList<TSchemaType>.CreateAsync(list, 
+                    var paginatedList = await PaginatedList<TSchemaType>.CreateAsync(list,
                         context.Argument<int>("pageIndex"), context.Argument<int>("pageSize"));
-                    var result = new PaginationPayload<TSchemaType> (paginatedList.ToList(), 
+                    var result = new PaginationPayload<TSchemaType>(paginatedList.ToList(),
                         paginatedList.HasNextPage, paginatedList.HasPreviousPage);
                     context.Result = result;
                 }
@@ -47,6 +51,7 @@ public class PaginationPayload <T> where T : class
         PageInfo = new PageInfo { HasNextPage = hasNext, HasPreviousPage = hasPrevious};
     }
     public IEnumerable<T> FieldType { get; }
+    [GraphQLNonNullType]
     public PageInfo PageInfo { get; }//TODO: use non-null attribute
 }
 
@@ -55,7 +60,7 @@ public class PaginationPayloadType<T> : ObjectType<PaginationPayload<T>> where T
     protected override void Configure(IObjectTypeDescriptor<PaginationPayload<T>> descriptor)
     {
         descriptor.Field(x => x.FieldType)
-            .Name(nameof(T));
+            .Name("list");
     }
 }
 
