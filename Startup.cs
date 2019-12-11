@@ -10,6 +10,8 @@ using Microsoft.Extensions.Hosting;
 
 using HotChocolate;
 using HotChocolate.AspNetCore;
+using HotChocolate.AspNetCore.Playground;
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 
 namespace graphql_intro_web_core
@@ -35,10 +37,19 @@ namespace graphql_intro_web_core
             {
                 app.UseDeveloperExceptionPage();
             }
+            var options = new RewriteOptions()
+                .AddRedirectToHttpsPermanent();
+
+            app.UseRewriter(options);
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+
 
             app
                 .UseGraphQL("/graphql")
                 .UsePlayground("/graphql");
+
+
         }
     }
 }
